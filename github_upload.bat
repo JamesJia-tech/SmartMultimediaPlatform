@@ -15,8 +15,9 @@ echo [2/4] 准备上传到GitHub...
 echo 请确保您已在GitHub上创建了仓库: SmartMultimediaPlatform
 echo.
 
-REM 提示用户输入GitHub仓库URL
-set /p REPO_URL="请输入您的GitHub仓库URL (例如: https://github.com/yourusername/SmartMultimediaPlatform.git): "
+REM 设置GitHub仓库URL
+set REPO_URL=https://github.com/JamesJia-tech/SmartMultimediaPlatform.git
+echo 仓库URL: %REPO_URL%
 
 echo.
 echo [3/4] 添加远程仓库...
