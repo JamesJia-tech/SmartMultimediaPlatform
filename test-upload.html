@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .upload-form { border: 2px dashed #ccc; padding: 40px; text-align: center; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        .message { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .log { background: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; margin: 20px 0; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>📸 上传测试页面</h1>
+    <p>这是一个简化的上传测试页面，用于调试上传问题。</p>
+    
+    <div class="upload-form">
+        <input type="file" id="fileInput" accept="image/*">
+        <br><br>
+        <button class="btn" onclick="uploadFile()">上传文件</button>
+    </div>
+    
+    <div id="message"></div>
+    
+    <h3>调试日志:</h3>
+    <div id="log" class="log"></div>
+    
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${time}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${time}] ${message}`);
+        }
+        
+        function showMessage(text, type = 'success') {
+            const messageElement = document.getElementById('message');
+            messageElement.innerHTML = `<div class="message ${type}">${text}</div>`;
+        }
+        
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showMessage('请选择一个文件', 'error');
+                log('错误: 没有选择文件');
+                return;
+            }
+            
+            log(`选择的文件: ${file.name}`);
+            log(`文件类型: ${file.type}`);
+            log(`文件大小: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showMessage('请选择图片文件', 'error');
+                log('错误: 不是图片文件');
+                return;
+            }
+            
+            // 检查文件大小
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('文件大小不能超过5MB', 'error');
+                log('错误: 文件太大');
+                return;
+            }
+            
+            log('开始上传...');
+            
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const progress = Math.round((e.loaded / e.total) * 100);
+                    log(`上传进度: ${progress}%`);
+                }
+            };
+            
+            xhr.onload = function() {
+                log(`HTTP状态码: ${xhr.status}`);
+                log(`响应内容: ${xhr.responseText}`);
+                
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            showMessage('上传成功！', 'success');
+                            log('✅ 上传成功');
+                        } else {
+                            showMessage('上传失败: ' + response.message, 'error');
+                            log('❌ 服务器返回错误: ' + response.message);
+                        }
+                    } catch (error) {
+                        showMessage('解析响应失败', 'error');
+                        log('❌ JSON解析错误: ' + error.message);
+                    }
+                } else {
+                    showMessage(`HTTP错误: ${xhr.status}`, 'error');
+                    log(`❌ HTTP错误: ${xhr.status} ${xhr.statusText}`);
+                }
+            };
+            
+            xhr.onerror = function() {
+                showMessage('网络错误', 'error');
+                log('❌ 网络错误');
+            };
+            
+            xhr.ontimeout = function() {
+                showMessage('上传超时', 'error');
+                log('❌ 上传超时');
+            };
+            
+            xhr.timeout = 30000; // 30秒超时
+            
+            log('发送POST请求到 /upload');
+            xhr.open('POST', '/upload');
+            xhr.send(formData);
+        }
+        
+        log('测试页面已加载');
+    </script>
+</body>
+</html>

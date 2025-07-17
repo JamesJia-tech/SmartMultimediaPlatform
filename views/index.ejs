@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>照片分享网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navigation {
+            background: #333;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #555;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .gallery {
+            padding: 40px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .gallery-title {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .image-count {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+        }
+
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .image-date {
+            color: #888;
+        }
+
+        .image-size {
+            color: #888;
+        }
+
+        .image-description {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        .image-tags {
+            margin: 10px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .empty-gallery {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-hint {
+            color: #999;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navigation {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-section,
+            .gallery {
+                padding: 20px;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 15px;
+            }
+
+            .gallery-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .image-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 0;
+            width: 90%;
+            max-width: 1200px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 分析详情模态框 */
+        .analysis-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s;
+        }
+
+        .analysis-content {
+            position: relative;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .analysis-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .analysis-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+        }
+
+        .analysis-close:hover {
+            color: #333;
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+        }
+
+        .analysis-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .analysis-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .analysis-item strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .analysis-value {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navigation">
+        <h1>📸 智能多媒体平台</h1>
+        <div class="nav-links">
+            <a href="/" class="nav-link active">📸 图片中心</a>
+            <a href="/videos" class="nav-link">🎬 视频中心</a>
+            <a href="/video-player" class="nav-link">🌐 在线播放</a>
+            <a href="/mini-browser" class="nav-link">🌍 迷你浏览器</a>
+            <a href="/web-proxy" class="nav-link">🔗 网页代理</a>
+            <a href="/game24" class="nav-link">🎯 计算24</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>📸 照片分享网站</h1>
+            <p>上传并分享您的美好瞬间</p>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">☁️</div>
+                <div class="upload-text">点击上传照片</div>
+                <div class="upload-hint">或拖拽图片到此处 (支持 JPG, PNG, GIF, WebP 格式，最大 5MB)</div>
+                <input type="file" id="fileInput" accept="image/*" multiple>
+            </div>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="message" id="message"></div>
+        </div>
+
+        <!-- 照片画廊 -->
+        <div class="gallery">
+            <div class="gallery-header">
+                <h2 class="gallery-title">照片画廊</h2>
+                <div class="image-count">共 <%= images.length %> 张照片</div>
+            </div>
+
+            <% if (images.length === 0) { %>
+                <div class="empty-gallery">
+                    <div class="empty-icon">🖼️</div>
+                    <div class="empty-text">还没有照片</div>
+                    <div class="empty-hint">快来上传第一张照片吧！</div>
+                </div>
+            <% } else { %>
+                <div class="grid" id="imageGrid">
+                    <% images.forEach(function(image) { %>
+                        <div class="image-card">
+                            <div class="image-container">
+                                <img src="/uploads/<%= image.filename %>" 
+                                     alt="<%= image.filename %>" 
+                                     onclick="openModal(this.src)">
+                                <div class="image-overlay"></div>
+                            </div>
+                            <div class="image-info">
+                                <div class="image-name"><%= image.filename %></div>
+                                <% if (image.analysis && image.analysis.description) { %>
+                                    <div class="image-description">
+                                        <strong>AI分析：</strong><%= image.analysis.description %>
+                                    </div>
+                                <% } %>
+                                <div class="image-meta">
+                                    <div class="image-date">
+                                        <%= new Date(image.uploadDate).toLocaleDateString('zh-CN') %>
+                                    </div>
+                                    <div class="image-size">
+                                        <%= (image.size / 1024 / 1024).toFixed(2) %> MB
+                                    </div>
+                                </div>
+                                <% if (image.analysis && image.analysis.tags) { %>
+                                    <div class="image-tags">
+                                        <% image.analysis.tags.slice(0, 5).forEach(function(tag) { %>
+                                            <span class="tag"><%= tag %></span>
+                                        <% }); %>
+                                    </div>
+                                <% } %>
+                                <div class="image-actions">
+                                    <button class="btn" onclick="downloadImage('/uploads/<%= image.filename %>', '<%= image.filename %>')">
+                                        下载
+                                    </button>
+                                    <button class="btn" onclick="showAnalysis('<%= image.filename %>')">
+                                        详细分析
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteImage('<%= image.filename %>')">
+                                        删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- 图片预览模态框 -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img class="modal-image" id="modalImage">
+        </div>
+    </div>
+
+    <!-- 分析详情模态框 -->
+    <div id="analysisModal" class="analysis-modal">
+        <div class="analysis-content">
+            <div class="analysis-header">
+                <h2 class="analysis-title">🤖 图片智能分析报告</h2>
+                <span class="analysis-close" onclick="closeAnalysisModal()">&times;</span>
+            </div>
+            <div id="analysisDetails">
+                <!-- 分析内容将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let isUploading = false;
+
+        // DOM 元素
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.querySelector('.upload-area');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const message = document.getElementById('message');
+        const imageGrid = document.getElementById('imageGrid');
+
+        // 文件上传处理
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        }
+
+        function uploadFiles(files) {
+            if (isUploading) return;
+            
+            const validFiles = Array.from(files).filter(file => {
+                const isImage = file.type.startsWith('image/');
+                const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+                
+                if (!isImage) {
+                    showMessage('请选择图片文件', 'error');
+                    return false;
+                }
+                if (!isValidSize) {
+                    showMessage('文件大小不能超过5MB', 'error');
+                    return false;
+                }
+                return true;
+            });
+
+            if (validFiles.length === 0) return;
+
+            uploadFilesSequentially(validFiles);
+        }
+
+        async function uploadFilesSequentially(files) {
+            isUploading = true;
+            progressBar.style.display = 'block';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const progress = ((i + 1) / files.length) * 100;
+                
+                try {
+                    await uploadSingleFile(file);
+                    updateProgress(progress);
+                } catch (error) {
+                    console.error('上传文件失败:', error);
+                    showMessage(`上传 ${file.name} 失败`, 'error');
+                }
+            }
+            
+            isUploading = false;
+            progressBar.style.display = 'none';
+            updateProgress(0);
+            fileInput.value = '';
+            
+            // 刷新页面显示新上传的图片
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
+        function uploadSingleFile(file) {
+            console.log('开始上传文件:', file.name, file.type, file.size);
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('photo', file);
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.onload = function() {
+                    console.log('上传响应状态:', xhr.status);
+                    console.log('上传响应内容:', xhr.responseText);
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                showMessage(`${file.name} 上传成功！`, 'success');
+                                resolve(response);
+                            } else {
+                                console.error('服务器返回错误:', response.message);
+                                showMessage(`${file.name} 上传失败: ${response.message}`, 'error');
+                                reject(new Error(response.message));
+                            }
+                        } catch (parseError) {
+                            console.error('解析响应JSON失败:', parseError);
+                            showMessage(`${file.name} 上传失败: 服务器响应格式错误`, 'error');
+                            reject(new Error('响应格式错误'));
+                        }
+                    } else {
+                        console.error('HTTP错误状态:', xhr.status, xhr.statusText);
+                        showMessage(`${file.name} 上传失败: HTTP ${xhr.status}`, 'error');
+                        reject(new Error(`HTTP错误: ${xhr.status}`));
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('网络错误');
+                    showMessage(`${file.name} 上传失败: 网络错误`, 'error');
+                    reject(new Error('网络错误'));
+                };
+                
+                console.log('发送上传请求到 /upload');
+                xhr.open('POST', '/upload');
+                xhr.send(formData);
+            });
+        }
+
+        function updateProgress(percent) {
+            progressFill.style.width = percent + '%';
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // 删除图片
+        async function deleteImage(filename) {
+            if (!confirm('确定要删除这张图片吗？')) return;
+
+            try {
+                const response = await fetch(`/delete/${filename}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('图片删除成功', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除图片失败:', error);
+                showMessage('删除失败，请重试', 'error');
+            }
+        }
+
+        // 下载图片
+        function downloadImage(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 显示图片分析详情
+        async function showAnalysis(filename) {
+            try {
+                const response = await fetch(`/api/analysis/${filename}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayAnalysis(result.analysis, filename);
+                    document.getElementById('analysisModal').style.display = 'block';
+                } else {
+                    showMessage('获取分析信息失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('获取分析信息失败:', error);
+                showMessage('获取分析信息失败', 'error');
+            }
+        }
+
+        // 显示分析结果
+        function displayAnalysis(analysis, filename) {
+            const detailsContainer = document.getElementById('analysisDetails');
+            
+            let html = `
+                <div class="analysis-section">
+                    <h3>🤖 AI智能描述</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-value">${analysis.description || '暂无描述'}</div>
+                    </div>
+                </div>`;
+
+            // 内容分析部分
+            if (analysis.contentAnalysis) {
+                html += `
+                <div class="analysis-section">
+                    <h3>🎯 内容分析</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <strong>内容类型</strong>
+                            <div class="analysis-value">${getContentTypeDisplay(analysis.contentAnalysis.contentType)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>场景</strong>
+                            <div class="analysis-value">${getSceneDisplay(analysis.contentAnalysis.scene)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>构图风格</strong>
+                            <div class="analysis-value">${getCompositionDisplay(analysis.contentAnalysis.composition)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>光线效果</strong>
+                            <div class="analysis-value">${getLightingDisplay(analysis.contentAnalysis.lighting)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>情绪色调</strong>
+                            <div class="analysis-value">${getMoodDisplay(analysis.contentAnalysis.mood)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>图片质量</strong>
+                            <div class="analysis-value">${getQualityDisplay(analysis.contentAnalysis.quality)}</div>
+                        </div>
+                    </div>
+                </div>`;
+
+                // 技术细节
+                if (analysis.contentAnalysis.technicalDetails && analysis.contentAnalysis.technicalDetails.length > 0) {
+                    html += `
+                    <div class="analysis-section">
+                        <h3>⚙️ 技术特性</h3>
+                        <div class="analysis-grid">`;
+                    analysis.contentAnalysis.technicalDetails.forEach(detail => {
+                        html += `
+                            <div class="analysis-item">
+                                <div class="analysis-value">✓ ${detail}</div>
+                            </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+            }
+
+            // 物体识别部分
+            if (analysis.objectDetection && analysis.objectDetection.detectedObjects.length > 0) {
+                html += `
+                <div class="analysis-section">
+                    <h3>🤖 AI智能物体识别</h3>`;
+                
+                // 如果有AI分析结果，显示AI信息
+                if (analysis.objectDetection.aiAnalysis && analysis.objectDetection.aiAnalysis.success) {
+                    html += `
+                    <div class="ai-analysis-info" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 1.1em; font-weight: bold;">🧠 深度学习AI分析</span>
+                            <span style="margin-left: auto; background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.9em;">
+                                检测到 ${analysis.objectDetection.aiAnalysis.totalDetections || 0} 个对象
+                            </span>
+                        </div>
+                        <div style="font-size: 0.95em; opacity: 0.9;">
+                            最高置信度: ${((analysis.objectDetection.aiAnalysis.maxConfidence || 0) * 100).toFixed(1)}% | 
+                            平均置信度: ${((analysis.objectDetection.aiAnalysis.avgConfidence || 0) * 100).toFixed(1)}%
+                        </div>
+                        ${analysis.objectDetection.aiAnalysis.aiDescription ? 
+                            `<div style="margin-top: 8px; font-style: italic; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 4px;">
+                                "${analysis.objectDetection.aiAnalysis.aiDescription}"
+                            </div>` : ''}
+                    </div>`;
+                }
+                
+                html += `
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <strong>主要物体</strong>
+                            <div class="analysis-value">${getObjectDisplay(analysis.objectDetection.primaryObject)}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>检测数量</strong>
+                            <div class="analysis-value">${analysis.objectDetection.objectCount} 个物体</div>
+                        </div>
+                    </div>
+                    <div class="analysis-item">
+                        <strong>检测到的物体</strong>
+                        <div class="analysis-value">`;
+                
+                analysis.objectDetection.objectDescriptions.forEach(obj => {
+                    const confidence = (obj.confidence * 100).toFixed(0);
+                    const confidenceColor = obj.confidence > 0.7 ? '#4CAF50' : obj.confidence > 0.5 ? '#FF9800' : '#F44336';
+                    html += `
+                        <div style="margin: 5px 0; padding: 8px; background: #f5f5f5; border-radius: 4px; border-left: 4px solid ${confidenceColor};">
+                            <span style="font-weight: bold;">${getObjectDisplay(obj.object)}</span>
+                            <span style="float: right; color: ${confidenceColor};">置信度: ${confidence}%</span>
+                            <div style="font-size: 0.9em; color: #666; margin-top: 2px;">${obj.description}</div>`;
+                    
+                    // 如果有AI增强的识别结果，显示具体名称
+                    if (obj.aiDetails) {
+                        html += `
+                            <div style="margin-top: 5px; padding: 4px 8px; background: linear-gradient(90deg, #e3f2fd, #f3e5f5); border-radius: 3px; font-size: 0.85em;">
+                                <span style="color: #1976d2;">🎯 AI识别: ${obj.aiDetails.specificName}</span>
+                                <span style="float: right; color: #7b1fa2;">AI置信度: ${(obj.aiDetails.aiConfidence * 100).toFixed(1)}%</span>
+                            </div>`;
+                    }
+                    
+                    html += `</div>`;
+                });
+                
+                html += `</div>
+                    </div>
+                </div>`;
+            }
+
+            html += `
+                <div class="analysis-section">
+                    <h3>📊 基本信息</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <strong>文件名</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.filename || filename}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>格式</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.format || 'Unknown'}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>尺寸</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.width || 0} × ${analysis.basicInfo?.height || 0}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>像素</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.megapixels || 0} MP</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>宽高比</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.aspectRatio ? analysis.basicInfo.aspectRatio.toFixed(2) : 'Unknown'}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>颜色通道</strong>
+                            <div class="analysis-value">${analysis.basicInfo?.channels || 'Unknown'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>🎨 色彩分析</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <strong>主要颜色</strong>
+                            <div class="analysis-value">${analysis.colorInfo?.dominantColor || 'Unknown'}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>亮度</strong>
+                            <div class="analysis-value">${analysis.colorInfo?.brightness || 'Unknown'}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>对比度</strong>
+                            <div class="analysis-value">${analysis.colorInfo?.contrast || 'Unknown'}</div>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>色彩丰富度</strong>
+                            <div class="analysis-value">${analysis.colorInfo?.colorfulness || 'Unknown'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (analysis.tags && analysis.tags.length > 0) {
+                html += `
+                    <div class="analysis-section">
+                        <h3>🏷️ 智能标签</h3>
+                        <div class="analysis-item">
+                            <div class="analysis-value">
+                                ${analysis.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="analysis-section">
+                    <h3>⏰ 分析时间</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-value">${new Date(analysis.analysisTime).toLocaleString('zh-CN')}</div>
+                    </div>
+                </div>
+            `;
+
+            detailsContainer.innerHTML = html;
+        }
+
+        // 关闭分析模态框
+        function closeAnalysisModal() {
+            document.getElementById('analysisModal').style.display = 'none';
+        }
+
+        // 内容分析显示辅助函数
+        function getContentTypeDisplay(contentType) {
+            const types = {
+                'portrait': '👤 人像摄影',
+                'landscape': '🏞️ 风景摄影',
+                'architecture': '🏢 建筑摄影',
+                'text_document': '📄 文档图片',
+                'photography': '📸 专业摄影',
+                'general': '🖼️ 通用图片'
+            };
+            return types[contentType] || contentType;
+        }
+
+        function getSceneDisplay(scene) {
+            const scenes = {
+                'sky_outdoor': '☀️ 天空户外',
+                'nature_outdoor': '🌿 自然户外',
+                'indoor_night': '🌙 室内夜晚',
+                'panoramic_landscape': '🌄 全景风景',
+                'portrait_close': '👁️ 近距人像',
+                'general_scene': '🎬 常规场景'
+            };
+            return scenes[scene] || scene;
+        }
+
+        function getCompositionDisplay(composition) {
+            const compositions = {
+                'square_centered': '⬜ 正方居中',
+                'panoramic_wide': '📐 全景宽幅',
+                'vertical_portrait': '📱 垂直肖像',
+                'horizontal_landscape': '💻 水平风景',
+                'standard_composition': '🎯 标准构图'
+            };
+            return compositions[composition] || composition;
+        }
+
+        function getLightingDisplay(lighting) {
+            const lightings = {
+                'strong_directional': '💡 强烈方向光',
+                'soft_diffused': '🕯️ 柔和漫射光',
+                'dramatic_shadow': '🎭 戏剧阴影',
+                'low_ambient': '🔅 低环境光',
+                'natural_balanced': '🌞 自然平衡光'
+            };
+            return lightings[lighting] || lighting;
+        }
+
+        function getMoodDisplay(mood) {
+            const moods = {
+                'energetic': '⚡ 充满活力',
+                'warm': '🔥 温暖舒适',
+                'calm': '😌 宁静平和',
+                'melancholic': '😔 忧郁深沉',
+                'peaceful': '☮️ 祥和平静',
+                'mysterious': '🔮 神秘莫测',
+                'dramatic': '🎪 戏剧性强',
+                'vibrant': '🌈 鲜艳生动',
+                'neutral': '⚖️ 中性平衡'
+            };
+            return moods[mood] || mood;
+        }
+
+        function getQualityDisplay(quality) {
+            const qualities = {
+                'excellent': '⭐⭐⭐⭐⭐ 卓越',
+                'good': '⭐⭐⭐⭐ 良好',
+                'fair': '⭐⭐⭐ 中等',
+                'basic': '⭐⭐ 基础'
+            };
+            return qualities[quality] || quality;
+        }
+
+        function getObjectDisplay(object) {
+            const objects = {
+                'person': '👤 人物',
+                'vehicle': '🚗 车辆',
+                'building': '🏢 建筑物',
+                'nature': '🌿 自然景观',
+                'animal': '🐾 动物',
+                'food': '🍽️ 食物',
+                'text': '📝 文字内容'
+            };
+            return objects[object] || object;
+        }
+
+        // 图片预览模态框
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            const analysisModal = document.getElementById('analysisModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+            if (event.target === analysisModal) {
+                closeAnalysisModal();
+            }
+        }
+
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                closeAnalysisModal();
+            }
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('照片分享网站已加载完成');
+        });
+    </script>
+</body>
+</html>

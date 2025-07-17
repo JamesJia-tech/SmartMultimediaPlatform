@@ -1,0 +1,38 @@
+{
+  "name": "smart-multimedia-platform",
+  "version": "2.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node testAI.js",
+    "ai-test": "python advancedAI.py",
+    "simple-ai": "python simpleAI.py"
+  },
+  "keywords": [
+    "multimedia",
+    "photo",
+    "video",
+    "upload",
+    "gallery",
+    "ai",
+    "image-analysis",
+    "web-proxy",
+    "mini-browser",
+    "game",
+    "express",
+    "nodejs"
+  ],
+  "author": "GitHub Copilot",
+  "license": "MIT",
+  "description": "智能多媒体平台 - 集成图片AI分析、视频播放、网页代理、迷你浏览器和智能游戏的综合Web应用",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.0",
+    "image-size": "^2.0.2",
+    "multer": "^2.0.1",
+    "sharp": "^0.34.3"
+  }
+}

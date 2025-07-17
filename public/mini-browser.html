@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷你浏览器 - 智能多媒体平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navigation {
+            background: #333;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #555;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .browser-controls {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 2px solid #e9ecef;
+            flex-shrink: 0;
+        }
+
+        .address-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #5a6fd8;
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .go-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .go-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-link {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quick-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .browser-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .website-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #666;
+            padding: 60px 20px;
+        }
+
+        .placeholder h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .placeholder p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #17a2b8;
+            margin: 20px;
+            display: none;
+        }
+
+        .status-bar {
+            background: #e9ecef;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .security-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .security-icon {
+            font-size: 0.8rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navigation {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+                height: calc(100vh - 100px);
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .browser-controls {
+                padding: 10px 15px;
+            }
+
+            .address-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .quick-links {
+                justify-content: center;
+            }
+
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navigation">
+        <h1>🎯 智能多媒体平台</h1>
+        <div class="nav-links">
+            <a href="/" class="nav-link">📸 图片中心</a>
+            <a href="/videos" class="nav-link">🎬 视频中心</a>
+            <a href="/video-player" class="nav-link">🌐 在线播放</a>
+            <a href="/mini-browser" class="nav-link active">🌍 迷你浏览器</a>
+            <a href="/web-proxy" class="nav-link">🔗 网页代理</a>
+            <a href="/game24" class="nav-link">🎯 计算24</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🌍 迷你浏览器</h1>
+            <p>支持YouTube视频播放和网站访问</p>
+        </div>
+
+        <!-- 浏览器控制栏 -->
+        <div class="browser-controls">
+            <div class="address-bar">
+                <button class="nav-btn" id="backBtn" onclick="goBack()" disabled title="后退">
+                    ⬅️
+                </button>
+                <button class="nav-btn" id="forwardBtn" onclick="goForward()" disabled title="前进">
+                    ➡️
+                </button>
+                <button class="nav-btn" onclick="refreshPage()" title="刷新">
+                    🔄
+                </button>
+                <input type="url" 
+                       class="url-input" 
+                       id="urlInput" 
+                       placeholder="请输入网址，如：https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                       autocomplete="off">
+                <button class="go-btn" onclick="loadWebsite()">
+                    访问
+                </button>
+            </div>
+            
+            <!-- 快速链接 -->
+            <div class="quick-links">
+                <span class="quick-link" onclick="loadQuickSite('https://www.youtube.com/watch?v=dQw4w9WgXcQ')">📺 YouTube视频</span>
+                <span class="quick-link" onclick="loadQuickSite('https://www.baidu.com')">🔍 百度</span>
+                <span class="quick-link" onclick="loadQuickSite('https://www.wikipedia.org')">📚 维基百科</span>
+                <span class="quick-link" onclick="loadQuickSite('https://news.ycombinator.com')">📰 Hacker News</span>
+                <span class="quick-link" onclick="loadQuickSite('https://www.stackoverflow.com')">💻 Stack Overflow</span>
+                <span class="quick-link" onclick="loadQuickSite('https://www.reddit.com')">🗨️ Reddit</span>
+                <span class="quick-link" onclick="loadQuickSite('https://github.com')">💻 GitHub</span>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- 浏览器内容区域 -->
+        <div class="browser-content">
+            <div class="iframe-container">
+                <!-- 加载遮罩 -->
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div style="text-align: center;">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">正在加载网页...</div>
+                    </div>
+                </div>
+
+                <!-- 默认占位符 -->
+                <div class="placeholder" id="placeholder">
+                    <h3>🌍 迷你浏览器 + YouTube播放器</h3>
+                    <p>在上方地址栏输入网址，或点击快速链接开始浏览</p>
+                    <br>
+                    <p style="font-size: 0.9rem; color: #999;">
+                        ✅ 特别支持YouTube视频播放<br>
+                        ✅ 自动检测并嵌入YouTube播放器
+                    </p>
+                </div>
+
+                <!-- 网页框架 -->
+                <iframe class="website-frame" 
+                        id="websiteFrame" 
+                        style="display: none;"
+                        onload="handleFrameLoad()"
+                        onerror="handleFrameError()">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="security-indicator">
+                <span class="security-icon" id="securityIcon">🔒</span>
+                <span id="statusText">准备就绪</span>
+            </div>
+            <div id="currentUrl">请输入网址开始浏览</div>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+        let currentIndex = -1;
+        let currentUrl = '';
+
+        // 检查是否为YouTube链接
+        function isYouTubeUrl(url) {
+            try {
+                const hostname = new URL(url).hostname.toLowerCase();
+                return hostname.includes('youtube.com') || hostname.includes('youtu.be');
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // 检查是否为企业安全服务
+        function isEnterpriseSecurityService(url) {
+            const enterpriseDomains = [
+                'saasprotection.com', 'zscaler.com', 'fortigate.com', 'checkpoint.com',
+                'paloaltonetworks.com', 'symantec.com', 'mcafee.com', 'cisco.com',
+                'sophos.com', 'trendmicro.com', 'kaspersky.com', 'bitdefender.com',
+                'cloudflare.com', 'akamai.com', 'imperva.com', 'fortinet.com'
+            ];
+            
+            try {
+                const hostname = new URL(url).hostname.toLowerCase();
+                return enterpriseDomains.some(domain => hostname.includes(domain));
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // 检查是否为常见的阻止iframe的网站
+        function isLikelyBlocked(url) {
+            const blockedDomains = [
+                'facebook.com', 'twitter.com', 'x.com',
+                'instagram.com', 'tiktok.com', 'linkedin.com', 'amazon.com',
+                'netflix.com', 'spotify.com', 'paypal.com', 'apple.com',
+                'microsoft.com', 'google.com', 'bilibili.com', 'weibo.com'
+            ];
+            
+            try {
+                const hostname = new URL(url).hostname.toLowerCase();
+                return blockedDomains.some(domain => hostname.includes(domain));
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // 加载网站
+        function loadWebsite() {
+            const urlInput = document.getElementById('urlInput');
+            let url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('请输入网址');
+                return;
+            }
+
+            // 自动添加协议
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+                urlInput.value = url;
+            }
+
+            if (!isValidUrl(url)) {
+                showError('请输入有效的网址');
+                return;
+            }
+
+            loadUrl(url);
+        }
+
+        // 加载URL
+        function loadUrl(url) {
+            const frame = document.getElementById('websiteFrame');
+            const placeholder = document.getElementById('placeholder');
+            const loading = document.getElementById('loadingOverlay');
+            
+            // 特殊处理YouTube链接
+            if (isYouTubeUrl(url)) {
+                handleYouTubeUrl(url);
+                return;
+            }
+            
+            // 检查是否为企业安全服务
+            if (isEnterpriseSecurityService(url)) {
+                showEnterpriseSecurityWarning(url);
+                return;
+            }
+            
+            // 检查是否为常见的阻止iframe的网站
+            if (isLikelyBlocked(url)) {
+                showBlockedWarning(url);
+                return;
+            }
+            
+            // 显示加载状态
+            showLoading(true);
+            hideMessages();
+            
+            // 更新历史记录
+            if (url !== currentUrl) {
+                currentIndex++;
+                history = history.slice(0, currentIndex);
+                history.push(url);
+                updateNavigationButtons();
+            }
+            
+            currentUrl = url;
+            updateStatus('正在加载...', url);
+            
+            // 隐藏占位符，显示iframe
+            placeholder.style.display = 'none';
+            frame.style.display = 'block';
+            
+            // 设置超时
+            const timeout = setTimeout(() => {
+                showLoading(false);
+                showError('网页加载超时，请检查网址是否正确或网络连接');
+            }, 15000);
+            
+            // 加载网页
+            frame.src = url;
+            frame.timeout = timeout;
+        }
+
+        // 处理YouTube URL
+        function handleYouTubeUrl(url) {
+            const container = document.querySelector('.iframe-container');
+            const placeholder = document.getElementById('placeholder');
+            placeholder.style.display = 'none';
+            
+            const videoId = extractYouTubeVideoId(url);
+            
+            if (videoId) {
+                // 成功提取视频ID，显示嵌入播放器
+                showYouTubePlayer(videoId, url);
+            } else {
+                // 无法提取视频ID，显示普通YouTube页面
+                showYouTubePageOptions(url);
+            }
+            
+            // 更新历史记录
+            if (url !== currentUrl) {
+                currentIndex++;
+                history = history.slice(0, currentIndex);
+                history.push(url);
+                updateNavigationButtons();
+            }
+            
+            currentUrl = url;
+            updateStatus('YouTube内容已加载', url);
+        }
+
+        // 提取YouTube视频ID
+        function extractYouTubeVideoId(url) {
+            try {
+                const urlObj = new URL(url);
+                
+                // 标准YouTube链接: https://www.youtube.com/watch?v=VIDEO_ID
+                if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/watch') {
+                    return urlObj.searchParams.get('v');
+                }
+                
+                // 短链接: https://youtu.be/VIDEO_ID
+                if (urlObj.hostname === 'youtu.be') {
+                    return urlObj.pathname.substring(1);
+                }
+                
+                // 嵌入链接: https://www.youtube.com/embed/VIDEO_ID
+                if (urlObj.hostname.includes('youtube.com') && urlObj.pathname.startsWith('/embed/')) {
+                    return urlObj.pathname.substring(7);
+                }
+                
+                return null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // 显示YouTube播放器
+        function showYouTubePlayer(videoId, originalUrl) {
+            const container = document.querySelector('.iframe-container');
+            
+            container.innerHTML = `
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000;">
+                    <!-- YouTube播放器控制栏 -->
+                    <div style="background: #282828; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 32px; height: 32px; background: #ff0000; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">▶</div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.1rem;">YouTube 视频播放器</h3>
+                                <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">视频ID: ${videoId}</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="${originalUrl}" target="_blank" 
+                               style="padding: 8px 16px; background: #ff0000; color: white; text-decoration: none; border-radius: 20px; font-size: 0.9rem; transition: all 0.3s ease;"
+                               onmouseover="this.style.background='#cc0000'"
+                               onmouseout="this.style.background='#ff0000'">
+                                🚀 在YouTube中打开
+                            </a>
+                            <button onclick="copyToClipboard('${originalUrl}')" 
+                                    style="padding: 8px 16px; background: #333; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease;"
+                                    onmouseover="this.style.background='#555'"
+                                    onmouseout="this.style.background='#333'">
+                                📋 复制链接
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- YouTube嵌入播放器 -->
+                    <div style="flex: 1; position: relative;">
+                        <iframe width="100%" 
+                                height="100%" 
+                                src="https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1&controls=1&showinfo=0"
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                        </iframe>
+                    </div>
+                    
+                    <!-- 播放器信息栏 -->
+                    <div style="background: #f8f9fa; padding: 10px 20px; font-size: 0.9rem; color: #666; border-top: 1px solid #ddd; flex-shrink: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>✅ YouTube嵌入播放器已成功加载</span>
+                            <span style="font-size: 0.8rem;">支持全屏播放、音量控制等完整功能</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showSuccess('YouTube视频已成功加载！');
+        }
+
+        // 显示YouTube页面选项（非视频链接）
+        function showYouTubePageOptions(url) {
+            const container = document.querySelector('.iframe-container');
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px 40px; background: #fff; border-radius: 15px; margin: 20px; max-width: 600px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">📺</div>
+                    <h3 style="color: #ff0000; margin-bottom: 20px; font-size: 1.5rem;">YouTube 页面检测</h3>
+                    <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+                        检测到YouTube链接，但无法提取视频ID。<br>
+                        这可能是频道页面、播放列表或搜索页面。
+                    </p>
+                    
+                    <!-- 主要操作按钮 -->
+                    <div style="margin: 30px 0;">
+                        <a href="${url}" target="_blank" 
+                           style="display: inline-block; padding: 18px 36px; background: #ff0000; color: white; text-decoration: none; border-radius: 30px; margin: 8px; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,0,0,0.3);"
+                           onmouseover="this.style.background='#cc0000'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(255,0,0,0.4)'"
+                           onmouseout="this.style.background='#ff0000'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,0,0,0.3)'">
+                            🚀 在YouTube中打开
+                        </a>
+                    </div>
+                    
+                    <!-- 视频播放提示 -->
+                    <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4caf50;">
+                        <h4 style="color: #2e7d32; margin-bottom: 15px;">💡 如何播放YouTube视频？</h4>
+                        <div style="text-align: left; color: #666; font-size: 0.9rem; line-height: 1.5;">
+                            <p style="margin-bottom: 10px;">1. <strong>复制视频链接</strong>：从YouTube复制具体的视频链接</p>
+                            <p style="margin-bottom: 10px;">2. <strong>粘贴到地址栏</strong>：格式如 youtube.com/watch?v=...</p>
+                            <p style="margin-bottom: 10px;">3. <strong>自动识别播放</strong>：系统会自动加载嵌入播放器</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 辅助操作 -->
+                    <div style="margin: 20px 0;">
+                        <button onclick="copyToClipboard('${url}')" 
+                                style="padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 25px; margin: 5px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;"
+                                onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                            📋 复制链接
+                        </button>
+                        <a href="/video-player" 
+                           style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 25px; margin: 5px; font-weight: 600; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='#5a6fd8'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
+                            🌐 使用在线播放器
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 显示企业安全服务警告
+        function showEnterpriseSecurityWarning(url) {
+            const container = document.querySelector('.iframe-container');
+            const placeholder = document.getElementById('placeholder');
+            const siteName = extractSiteName(url);
+            
+            placeholder.style.display = 'none';
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px 40px; background: #fff8e1; border-radius: 15px; margin: 20px; max-width: 700px; border: 2px solid #ff9800;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🏢</div>
+                    <h3 style="color: #e65100; margin-bottom: 20px; font-size: 1.6rem;">企业网络安全检测</h3>
+                    <p style="color: #666; margin-bottom: 25px; line-height: 1.6; font-size: 1.1rem;">
+                        检测到 <strong>${siteName}</strong> 是企业安全防护服务。<br>
+                        这通常表示您正在使用公司网络或企业安全代理。
+                    </p>
+                    
+                    <!-- 主要说明 -->
+                    <div style="margin: 30px 0; padding: 25px; background: #e3f2fd; border-radius: 15px; border-left: 5px solid #2196f3;">
+                        <h4 style="color: #1976d2; margin-bottom: 15px; font-size: 1.2rem;">🔍 这意味着什么？</h4>
+                        <div style="text-align: left; color: #555; font-size: 1rem; line-height: 1.6;">
+                            <p style="margin-bottom: 12px;"><strong>• 企业网络环境</strong>：您可能正在使用公司、学校或机构的网络</p>
+                            <p style="margin-bottom: 12px;"><strong>• 安全代理服务</strong>：网络流量被安全设备拦截和过滤</p>
+                            <p style="margin-bottom: 12px;"><strong>• 访问限制</strong>：某些网站可能被企业安全策略阻止</p>
+                            <p style="margin-bottom: 0;"><strong>• 正常现象</strong>：这是企业网络的标准安全保护措施</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 解决方案 -->
+                    <div style="margin: 30px 0; padding: 25px; background: #e8f5e8; border-radius: 15px; border-left: 5px solid #4caf50;">
+                        <h4 style="color: #2e7d32; margin-bottom: 15px; font-size: 1.2rem;">💡 可能的解决方案</h4>
+                        <div style="text-align: left; color: #555; font-size: 1rem; line-height: 1.6;">
+                            <p style="margin-bottom: 12px;"><strong>1. 使用个人网络</strong>：切换到家庭WiFi或手机热点</p>
+                            <p style="margin-bottom: 12px;"><strong>2. 联系IT部门</strong>：询问是否可以访问特定网站</p>
+                            <p style="margin-bottom: 12px;"><strong>3. 使用官方应用</strong>：下载官方App替代网页访问</p>
+                            <p style="margin-bottom: 0;"><strong>4. 遵守网络政策</strong>：查看公司网络使用规定</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div style="margin: 30px 0;">
+                        <button onclick="forceLoad('${url}')"
+                                style="padding: 15px 30px; background: #ff9800; color: white; border: none; border-radius: 25px; margin: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 1rem;"
+                                onmouseover="this.style.background='#f57c00'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='#ff9800'; this.style.transform='translateY(0)'">
+                            🔄 尝试继续访问
+                        </button>
+                        <a href="${url}" target="_blank" 
+                           style="display: inline-block; padding: 15px 30px; background: #2196f3; color: white; text-decoration: none; border-radius: 25px; margin: 8px; font-weight: 600; transition: all 0.3s ease; font-size: 1rem;"
+                           onmouseover="this.style.background='#1976d2'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='#2196f3'; this.style.transform='translateY(0)'">
+                            🚀 在新窗口中打开
+                        </a>
+                    </div>
+                    
+                    <!-- 技术信息 -->
+                    <div style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 10px; border-left: 4px solid #757575;">
+                        <h4 style="color: #424242; margin-bottom: 10px; font-size: 1rem;">🔧 技术说明</h4>
+                        <p style="color: #666; font-size: 0.9rem; line-height: 1.5;">
+                            域名 <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">${url}</code> 
+                            被识别为企业安全服务。这类服务通常用于网络流量监控、内容过滤和安全防护。
+                        </p>
+                    </div>
+                    
+                    <!-- 推荐的可访问网站 -->
+                    <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4caf50;">
+                        <h4 style="color: #2e7d32; margin-bottom: 15px;">✅ 推荐在企业网络中访问的网站：</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 15px;">
+                            <button onclick="loadQuickSite('https://www.wikipedia.org')" 
+                                    style="padding: 10px 15px; background: #f0f8f0; border: 1px solid #4caf50; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;"
+                                    onmouseover="this.style.background='#4caf50'; this.style.color='white'"
+                                    onmouseout="this.style.background='#f0f8f0'; this.style.color='inherit'">
+                                📚 维基百科
+                            </button>
+                            <button onclick="loadQuickSite('https://news.ycombinator.com')" 
+                                    style="padding: 10px 15px; background: #f0f8f0; border: 1px solid #4caf50; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;"
+                                    onmouseover="this.style.background='#4caf50'; this.style.color='white'"
+                                    onmouseout="this.style.background='#f0f8f0'; this.style.color='inherit'">
+                                📰 Hacker News
+                            </button>
+                            <button onclick="loadQuickSite('https://github.com')" 
+                                    style="padding: 10px 15px; background: #f0f8f0; border: 1px solid #4caf50; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;"
+                                    onmouseover="this.style.background='#4caf50'; this.style.color='white'"
+                                    onmouseout="this.style.background='#f0f8f0'; this.style.color='inherit'">
+                                💻 GitHub
+                            </button>
+                            <button onclick="loadQuickSite('https://www.stackoverflow.com')" 
+                                    style="padding: 10px 15px; background: #f0f8f0; border: 1px solid #4caf50; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;"
+                                    onmouseover="this.style.background='#4caf50'; this.style.color='white'"
+                                    onmouseout="this.style.background='#f0f8f0'; this.style.color='inherit'">
+                                💻 Stack Overflow
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            updateStatus('企业网络检测', url);
+        }
+
+        // 显示被阻止网站的警告
+        function showBlockedWarning(url) {
+            const container = document.querySelector('.iframe-container');
+            const placeholder = document.getElementById('placeholder');
+            const siteName = extractSiteName(url);
+            
+            placeholder.style.display = 'none';
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px 40px; background: #fff8e1; border-radius: 15px; margin: 20px; max-width: 600px; border: 2px dashed #ffa726;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">⚠️</div>
+                    <h3 style="color: #ef6c00; margin-bottom: 20px; font-size: 1.5rem;">该网站可能无法在框架中显示</h3>
+                    <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+                        <strong>${siteName}</strong> 通常不允许在iframe中嵌入显示。<br>
+                        您可以选择在新窗口中打开，或尝试其他网站。
+                    </p>
+                    <div style="margin: 30px 0;">
+                        <button onclick="forceLoad('${url}')"
+                                style="padding: 15px 30px; background: #ff9800; color: white; border: none; border-radius: 25px; margin: 5px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;"
+                                onmouseover="this.style.background='#f57c00'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='#ff9800'; this.style.transform='translateY(0)'">
+                            🔄 强制尝试加载
+                        </button>
+                        <a href="${url}" target="_blank" 
+                           style="display: inline-block; padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 25px; margin: 5px; font-weight: 600; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='#5a6fd8'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
+                            🚀 在新窗口中打开
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            updateStatus('网站可能被阻止', url);
+        }
+
+        // 强制加载
+        function forceLoad(url) {
+            const frame = document.getElementById('websiteFrame');
+            const placeholder = document.getElementById('placeholder');
+            const loading = document.getElementById('loadingOverlay');
+            
+            // 显示加载状态
+            showLoading(true);
+            hideMessages();
+            
+            // 更新历史记录
+            if (url !== currentUrl) {
+                currentIndex++;
+                history = history.slice(0, currentIndex);
+                history.push(url);
+                updateNavigationButtons();
+            }
+            
+            currentUrl = url;
+            updateStatus('强制加载中...', url);
+            
+            // 隐藏占位符，显示iframe
+            placeholder.style.display = 'none';
+            frame.style.display = 'block';
+            
+            // 设置较短的超时时间
+            const timeout = setTimeout(() => {
+                showLoading(false);
+                showFrameBlocked(url);
+            }, 8000);
+            
+            frame.src = url;
+            frame.timeout = timeout;
+            
+            showSuccess('正在强制尝试加载，请稍等...');
+        }
+
+        // 显示网站被阻止的提示
+        function showFrameBlocked(url) {
+            const container = document.querySelector('.iframe-container');
+            const siteName = extractSiteName(url);
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px 40px; background: #f8f9fa; border-radius: 15px; margin: 20px; max-width: 600px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
+                    <h3 style="color: #e74c3c; margin-bottom: 20px; font-size: 1.5rem;">${siteName} 拒绝连接</h3>
+                    <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+                        <strong>${siteName}</strong> 设置了安全策略，禁止在框架中显示。<br>
+                        这是正常的安全保护措施。
+                    </p>
+                    
+                    <div style="margin: 30px 0;">
+                        <a href="${url}" target="_blank" 
+                           style="display: inline-block; padding: 18px 36px; background: #ff0000; color: white; text-decoration: none; border-radius: 30px; margin: 8px; font-weight: 600; font-size: 1.1rem;"
+                           onmouseover="this.style.background='#cc0000'"
+                           onmouseout="this.style.background='#ff0000'">
+                            🚀 在新窗口中打开
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 快速访问网站
+        function loadQuickSite(url) {
+            document.getElementById('urlInput').value = url;
+            loadUrl(url);
+        }
+
+        // 后退
+        function goBack() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                const url = history[currentIndex];
+                document.getElementById('urlInput').value = url;
+                loadUrl(url);
+            }
+        }
+
+        // 前进
+        function goForward() {
+            if (currentIndex < history.length - 1) {
+                currentIndex++;
+                const url = history[currentIndex];
+                document.getElementById('urlInput').value = url;
+                loadUrl(url);
+            }
+        }
+
+        // 刷新页面
+        function refreshPage() {
+            if (currentUrl) {
+                loadUrl(currentUrl);
+            }
+        }
+
+        // 更新导航按钮状态
+        function updateNavigationButtons() {
+            const backBtn = document.getElementById('backBtn');
+            const forwardBtn = document.getElementById('forwardBtn');
+            
+            backBtn.disabled = currentIndex <= 0;
+            forwardBtn.disabled = currentIndex >= history.length - 1;
+        }
+
+        // 处理框架加载完成
+        function handleFrameLoad() {
+            const frame = document.getElementById('websiteFrame');
+            if (frame.timeout) {
+                clearTimeout(frame.timeout);
+            }
+            
+            showLoading(false);
+            updateStatus('加载完成', currentUrl);
+            showSuccess('网页加载成功');
+        }
+
+        // 处理框架加载错误
+        function handleFrameError() {
+            const frame = document.getElementById('websiteFrame');
+            if (frame.timeout) {
+                clearTimeout(frame.timeout);
+            }
+            
+            showLoading(false);
+            showFrameBlocked(currentUrl);
+            updateStatus('访问被拒绝', currentUrl);
+        }
+
+        // 提取网站名称
+        function extractSiteName(url) {
+            try {
+                const hostname = new URL(url).hostname;
+                return hostname.replace(/^www\./, '').split('.')[0];
+            } catch (error) {
+                return '该网站';
+            }
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('链接已复制到剪贴板！');
+            }).catch(() => {
+                showSuccess('复制功能需要HTTPS环境');
+            });
+        }
+
+        // 更新状态栏
+        function updateStatus(status, url) {
+            const statusText = document.getElementById('statusText');
+            const currentUrlText = document.getElementById('currentUrl');
+            const securityIcon = document.getElementById('securityIcon');
+            
+            statusText.textContent = status;
+            currentUrlText.textContent = url || '请输入网址开始浏览';
+            
+            // 更新安全图标
+            if (url && url.startsWith('https://')) {
+                securityIcon.textContent = '🔒';
+                securityIcon.title = '安全连接';
+            } else if (url && url.startsWith('http://')) {
+                securityIcon.textContent = '⚠️';
+                securityIcon.title = '不安全连接';
+            } else {
+                securityIcon.textContent = '🔒';
+                securityIcon.title = '准备就绪';
+            }
+        }
+
+        // 验证URL格式
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // 显示成功信息
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 隐藏消息
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // 显示/隐藏加载状态
+        function showLoading(show) {
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = show ? 'flex' : 'none';
+        }
+
+        // 监听回车键
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadWebsite();
+            }
+        });
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('准备就绪', '');
+            updateNavigationButtons();
+        });
+    </script>
+</body>
+</html>

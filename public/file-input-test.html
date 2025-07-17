@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件选择测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-wrapper {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            background: rgba(100, 150, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border: 2px dashed #666;
+        }
+        .file-input-wrapper:hover {
+            background: rgba(100, 150, 255, 0.3);
+        }
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 文件选择按钮测试</h1>
+    
+    <div class="test-wrapper">
+        <h3>测试1: 透明覆盖方式（推荐）</h3>
+        <div class="file-input-wrapper">
+            <input type="file" id="testInput1" accept="video/*" class="file-input">
+            <span id="label1">📁 点击选择视频文件</span>
+        </div>
+        <div id="result1" class="result"></div>
+    </div>
+
+    <div class="test-wrapper">
+        <h3>测试2: 直接点击方式</h3>
+        <input type="file" id="testInput2" accept="video/*" style="margin: 10px 0;">
+        <div id="result2" class="result"></div>
+    </div>
+
+    <div class="test-wrapper">
+        <h3>测试3: 按钮触发方式</h3>
+        <button type="button" onclick="document.getElementById('testInput3').click()" 
+                style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            📁 选择视频文件
+        </button>
+        <input type="file" id="testInput3" accept="video/*" style="display: none;">
+        <div id="result3" class="result"></div>
+    </div>
+
+    <script>
+        // 测试1
+        document.getElementById('testInput1').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const label = document.getElementById('label1');
+            const result = document.getElementById('result1');
+            
+            if (file) {
+                label.textContent = `📁 ${file.name}`;
+                result.innerHTML = `✅ 文件选择成功！<br>名称: ${file.name}<br>大小: ${(file.size/1024/1024).toFixed(2)}MB<br>类型: ${file.type}`;
+                result.style.display = 'block';
+            }
+        });
+
+        // 测试2
+        document.getElementById('testInput2').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const result = document.getElementById('result2');
+            
+            if (file) {
+                result.innerHTML = `✅ 文件选择成功！<br>名称: ${file.name}<br>大小: ${(file.size/1024/1024).toFixed(2)}MB<br>类型: ${file.type}`;
+                result.style.display = 'block';
+            }
+        });
+
+        // 测试3
+        document.getElementById('testInput3').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const result = document.getElementById('result3');
+            
+            if (file) {
+                result.innerHTML = `✅ 文件选择成功！<br>名称: ${file.name}<br>大小: ${(file.size/1024/1024).toFixed(2)}MB<br>类型: ${file.type}`;
+                result.style.display = 'block';
+            }
+        });
+
+        console.log('文件选择测试页面已加载');
+    </script>
+</body>
+</html>
